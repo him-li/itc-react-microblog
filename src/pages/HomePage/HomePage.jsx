@@ -2,8 +2,8 @@ import moment from 'moment';
 import { Container } from 'react-bootstrap';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import CreateTweet from './components/TweetFormReducerVer';
-import TweetsList from './components/TweetsList';
+import CreateTweet from './TweetFormReducerVer';
+import TweetsList from './TweetsList';
 import TweetsContext from '../../context/TweetsContext';
 import NavBar from '../../components/NavBar';
 
