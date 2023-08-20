@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { Container } from 'react-bootstrap';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import CreateTweet from './components/TweetFormReducerVer';
 import TweetsList from './components/TweetsList';
@@ -14,11 +14,11 @@ export default function HomePage() {
   const savedUsername = localStorage.getItem('username') || 'Xin';
   const APIEndpoint = 'https://64bf87370d8e251fd110f72a.mockapi.io/microblog/tweets';
 
-  const fetchTweets = (page) => {
+  const fetchTweets = useCallback((page) => {
     const url = new URL(APIEndpoint);
     url.searchParams.append('page', page);
     url.searchParams.append('limit', 10);
-    url.searchParams.append('orderBy', parseInt('id'));
+    url.searchParams.append('orderBy', 'date');
     url.searchParams.append('order', 'desc');
 
     fetch(url, {
@@ -31,11 +31,16 @@ export default function HomePage() {
         } throw new Error('Network response was not ok');
       })
       .then((tasks) => {
+        const tweetsWithFormattedDates = tasks.map(task => ({
+          ...task,
+          date: moment(task.date).format('DD MMM YYYY, kk:mm:ss')
+        }));
+
         setIsLoading(false);
         if (page === 1) {
-          setTweets(tasks);
+          setTweets(tweetsWithFormattedDates);
         } else {
-          setTweets((prevTweets) => [...prevTweets, ...tasks]);
+          setTweets((prevTweets) => [...prevTweets, ...tweetsWithFormattedDates]);
         }
       })
       .catch(error => {
@@ -44,42 +49,35 @@ export default function HomePage() {
       .finally(() => {
         setIsLoading(false);
       })
-  }
+  }, [setTweets]);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (
       window.innerHeight + document.documentElement.scrollTop >=
       document.documentElement.scrollHeight
     ) {
       setPage((prevPage) => prevPage + 1);
     }
-  }
+  })
 
   useEffect(() => {
     fetchTweets(page);
-  }, [page]);
+  }, [fetchTweets, page]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [handleScroll]);
 
-  const addTweet = (user, text) => {
+  const addTweet = useCallback((user, text) => {
     const newTweet = {
       user: savedUsername || user,
       text: text,
-      date: new moment().format('DD MMM YYYY, kk:mm:ss')
+      date: moment().unix(),
     };
     setIsLoading(true);
-
-    setTweets((prevTweets) => {
-      const sortedTweets = [...prevTweets, newTweet].sort((a, b) => new Date(b.date) - new Date(a.date));
-      return sortedTweets;
-    });
-
-    setTweetsCount((prevCount) => prevCount + 1);
 
     fetch(APIEndpoint, {
       method: 'POST',
@@ -90,14 +88,17 @@ export default function HomePage() {
         return res.json();
       } throw new Error('Network response was not ok');
     }).then(task => {
-      const sortedTweets = [...tweets, newTweet].sort((a, b) => new Date(b.date) - new Date(a.date));
-      setTweets(sortedTweets);
+      const receivedUnixTimestamp = task.date;
+      const formattedDate = moment.unix(receivedUnixTimestamp).format('DD MMM YYYY, kk:mm:ss');
+      const updatedTweet = { ...newTweet, date: formattedDate };
+      setTweets((prevTweets) => [updatedTweet, ...prevTweets]);
+      setTweetsCount((prevCount) => prevCount + 1);
       setIsLoading(false);
     }).catch(error => {
       console.error('Error posting data:', error);
       setIsLoading(false);
-    })
-  };
+    });
+  }, [setTweets, setTweetsCount, savedUsername])
 
   return (
     <Container fluid='md' className='h-100'>
