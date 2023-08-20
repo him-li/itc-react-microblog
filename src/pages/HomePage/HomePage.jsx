@@ -8,8 +8,7 @@ import TweetsContext from '../../context/TweetsContext';
 import NavBar from '../../components/NavBar';
 
 export default function HomePage() {
-  const tweetsContext = useContext(TweetsContext);
-  const { tweets, setTweets, tweetsCount, setTweetsCount } = tweetsContext;
+  const { tweets, setTweets, setTweetsCount } = useContext(TweetsContext);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const savedUsername = localStorage.getItem('username') || 'Xin';
@@ -19,36 +18,32 @@ export default function HomePage() {
     const url = new URL(APIEndpoint);
     url.searchParams.append('page', page);
     url.searchParams.append('limit', 10);
+    url.searchParams.append('orderBy', parseInt('id'));
+    url.searchParams.append('order', 'desc');
+
     fetch(url, {
       method: 'GET',
       headers: { 'content-type': 'application/json' },
-    }).then(res => {
-      if (res.ok) {
-        return res.json();
-      } throw new Error('Network response was not ok');
-    }).then(tasks => {
-      setIsLoading(false);
-      if (page === 1) {
-
-        const sortedTweets = tasks.map(task => ({
-          ...task,
-          date: moment(task.date).format('DD MMM YYYY, kk:mm:ss')
-        })).sort((a, b) => new Date(b.date) - new Date(a.date));
-        setTweets(sortedTweets);
-
-      } else {
-        setTweets((prevTweets) => {
-          const sortedTweets = [...prevTweets, ...tasks].sort(
-            (a, b) => new Date(b.date) - new Date(a.date)
-          );
-          return sortedTweets;
-        });
-      }
-    }).catch(error => {
-      console.error('Error fetching data:', error);
-    }).finally(() => {
-      setIsLoading(false);
     })
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        } throw new Error('Network response was not ok');
+      })
+      .then((tasks) => {
+        setIsLoading(false);
+        if (page === 1) {
+          setTweets(tasks);
+        } else {
+          setTweets((prevTweets) => [...prevTweets, ...tasks]);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
   }
 
   const handleScroll = () => {
