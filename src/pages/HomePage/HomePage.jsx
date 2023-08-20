@@ -13,6 +13,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const savedUsername = localStorage.getItem('username') || 'Xin';
   const APIEndpoint = 'https://64bf87370d8e251fd110f72a.mockapi.io/microblog/tweets';
+  // const { dispatch } = useContext(TweetsContext); //Pass the dispatch function from CreateTweet to your HomePage component and use it in the addTweet function there.
 
   const fetchTweets = useCallback((page) => {
     const url = new URL(APIEndpoint);
@@ -99,6 +100,41 @@ export default function HomePage() {
       setIsLoading(false);
     });
   }, [setTweets, setTweetsCount, savedUsername])
+
+  /*   const addTweet = useCallback(
+      async (user, text) => {
+        dispatch({ type: 'SUBMIT_LOADING' });
+        try {
+          const response = await fetch(APIEndpoint, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              user: savedUsername || user,
+              text: text,
+              date: new moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+            }),
+          });
+          if (response.ok) {
+            const task = await response.json();
+            dispatch({ type: 'SUBMIT_SUCCESS' });
+            dispatch({
+              type: 'ADD_TWEET',
+              payload: {
+                user: task.user,
+                text: task.text,
+                date: task.date,
+              },
+            });
+          } else {
+            throw new Error('Network response was not ok');
+          }
+        } catch (error) {
+          console.error('Error posting data:', error);
+          dispatch({ type: 'SUBMIT_FAILURE' });
+        }
+      },
+      [dispatch, savedUsername]
+    ); */
 
   return (
     <Container fluid='md' className='h-100'>

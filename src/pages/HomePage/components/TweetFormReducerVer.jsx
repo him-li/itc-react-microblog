@@ -11,6 +11,16 @@ const initialState = {
 
 function reducer(state, action) {
     switch (action.type) {
+        /*         case 'ADD_TWEET':
+                    const newTweet = {
+                        user: action.payload.user,
+                        text: action.payload.text,
+                        date: action.payload.date,
+                    };
+                    return {
+                        ...state,
+                        tweets: [newTweet, ...state.tweets], // Assuming you have a 'tweets' property in your state
+                    }; */
         case 'INPUT':
             const inputText = action.payload;
             const newButtonState = inputText.length > 140;
@@ -42,7 +52,7 @@ function reducer(state, action) {
     }
 }
 
-export default function CreateTweet({ addTweet }) {
+export default function CreateTweet({ addTweet }) { //replace addTweet with dispatch to move addTweet here
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const handleInput = (e) => {
@@ -63,6 +73,40 @@ export default function CreateTweet({ addTweet }) {
             }
         }
     }
+    /*     const handleClick = async (e) => {
+            e.preventDefault();
+            if (state.text.trim() !== '' && !state.buttonLoading) {
+                dispatch({ type: 'SUBMIT_LOADING' });
+                try {
+                    const response = await fetch(APIEndpoint, {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify({
+                            user: 'Xin',
+                            text: state.text.trim(),
+                            date: new Date().toISOString(),
+                        }),
+                    });
+                    if (response.ok) {
+                        const task = await response.json();
+                        dispatch({ type: 'SUBMIT_SUCCESS' });
+                        dispatch({
+                            type: 'ADD_TWEET',
+                            payload: {
+                                user: task.user,
+                                text: task.text,
+                                date: task.date,
+                            },
+                        });
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                } catch (error) {
+                    console.error('Error posting data:', error);
+                    dispatch({ type: 'SUBMIT_FAILURE' });
+                }
+            }
+        } */
 
     return (
         <Form onSubmit={handleClick}>
