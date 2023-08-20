@@ -5,6 +5,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import CreateTweet from './components/TweetFormReducerVer';
 import TweetsList from './components/TweetsList';
 import TweetsContext from '../../context/TweetsContext';
+import NavBar from '../../components/NavBar';
 
 export default function HomePage() {
   const tweetsContext = useContext(TweetsContext);
@@ -28,8 +29,13 @@ export default function HomePage() {
     }).then(tasks => {
       setIsLoading(false);
       if (page === 1) {
-        const sortedTweets = tasks.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const sortedTweets = tasks.map(task => ({
+          ...task,
+          date: moment(task.date).format('DD MMM YYYY, kk:mm:ss')
+        })).sort((a, b) => new Date(b.date) - new Date(a.date));
         setTweets(sortedTweets);
+
       } else {
         setTweets((prevTweets) => {
           const sortedTweets = [...prevTweets, ...tasks].sort(
@@ -100,6 +106,7 @@ export default function HomePage() {
 
   return (
     <Container fluid='md' className='h-100'>
+      <NavBar />
       <CreateTweet addTweet={addTweet} isLoading={isLoading} />
       <TweetsList tweets={tweets} isLoading={isLoading} />
     </Container>

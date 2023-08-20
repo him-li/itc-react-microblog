@@ -1,17 +1,20 @@
 import { Container, FloatingLabel, Form, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { useState } from 'react';
+import NavBar from '../../components/NavBar';
 
 export default function ProfilePage() {
     const [username, setUsername] = useState('');
 
-    const handleClick = () => {
+    const handleClick = (e) => {
+        e.preventDefault();
         localStorage.setItem('username', username);
         toast('Username saved successfully!');
     }
 
     return (
-        <Container className='position-relative'>
+        <Container fluid='md' className='position-relative h-100 w-100'>
+            <NavBar />
             <Form.Label className='text-light fs-1'>Profile</Form.Label>
             <FloatingLabel
                 controlId='floatingInput'
